@@ -1,0 +1,59 @@
+; Copyright (c) 1999-2000 Trek Technology (S) Pte Ltd
+[Version]
+Signature="$CHICAGO$"
+Class=USB
+provider=%TREK%
+
+[SourceDisksNames]
+1="ThumbDrive Installation Disk",,,
+
+[SourceDisksFiles]
+trekTh2k.sys=1
+trekTh.sys=1
+
+
+[Manufacturer]
+%MfgName%=TREK
+
+[TREK]
+%USB\VID_0A16&PID_1111.DeviceDesc%=trek.Dev, USB\VID_0A16&PID_1111
+
+[DestinationDirs]
+Trek.Files.Ext = 10,System32\Drivers
+Trek.Files.Ext.NT = 10,System32\Drivers
+
+[trek.Dev]
+CopyFiles=Trek.Files.Ext
+AddReg=Trek.AddReg
+
+[Trek.Dev.NT]
+CopyFiles=Trek.Files.Ext.NT
+
+
+[Trek.Dev.NT.Services]
+Addservice = TREKTH2K, 0x00000002, TrekTh2k.AddService
+
+[TrekTh2k.AddService]
+DisplayName    = %TrekTh2k.SvcDesc%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 2                  ; SERVICE_AUTO_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\TREKTH2K.sys
+LoadOrderGroup = Base
+
+[Trek.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,TREKTH.sys
+
+[Trek.Files.Ext]
+TREKTH.sys
+
+
+[Trek.Files.Ext.NT]
+TREKTH2k.sys
+
+[Strings]
+TREK="TREK"
+MfgName="Trek"
+USB\VID_0A16&PID_1111.DeviceDesc="ThumbDrive Device"
+TrekTh2k.SvcDesc="Thumb Drive Device"
