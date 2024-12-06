@@ -1,0 +1,379 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "array",
+  "items": {
+    "$id": "#/items",
+    "type": "object",
+    "required": [
+      "_index",
+      "_type",
+      "_score",
+      "_source"
+    ],
+    "properties": {
+      "_index": {
+        "$id": "#/items/properties/_index",
+        "type": "string",
+        "pattern": "^(.*)$"
+      },
+      "_type": {
+        "$id": "#/items/properties/_type",
+        "type": "string",
+        "pattern": "^(.*)$"
+      },
+      "_score": {
+        "$id": "#/items/properties/_score",
+        "type": "null"
+      },
+      "_source": {
+        "$id": "#/items/properties/_source",
+        "type": "object",
+        "required": [
+          "layers"
+        ],
+        "properties": {
+          "layers": {
+            "$id": "#/items/properties/_source/properties/layers",
+            "type": "object",
+            "required": [
+              "frame",
+              "usb",
+              "URB setup"
+            ],
+            "properties": {
+              "frame": {
+                "$id": "#/items/properties/_source/properties/layers/properties/frame",
+                "type": "object",
+                "required": [
+                  "frame.interface_id",
+                  "frame.interface_id_tree",
+                  "frame.encap_type",
+                  "frame.time",
+                  "frame.offset_shift",
+                  "frame.time_epoch",
+                  "frame.time_delta",
+                  "frame.time_delta_displayed",
+                  "frame.time_relative",
+                  "frame.number",
+                  "frame.len",
+                  "frame.cap_len",
+                  "frame.marked",
+                  "frame.ignored",
+                  "frame.protocols"
+                ],
+                "properties": {
+                  "frame.interface_id": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.interface_id",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.interface_id_tree": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.interface_id_tree",
+                    "type": "object",
+                    "required": [
+                      "frame.interface_name"
+                    ],
+                    "properties": {
+                      "frame.interface_name": {
+                        "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.interface_id_tree/properties/frame.interface_name",
+                        "type": "string",
+                        "pattern": "^(.*)$"
+                      }
+                    }
+                  },
+                  "frame.encap_type": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.encap_type",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.time": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.time",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.offset_shift": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.offset_shift",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.time_epoch": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.time_epoch",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.time_delta": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.time_delta",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.time_delta_displayed": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.time_delta_displayed",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.time_relative": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.time_relative",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.number": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.number",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.len": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.len",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.cap_len": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.cap_len",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.marked": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.marked",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.ignored": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.ignored",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "frame.protocols": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/frame/properties/frame.protocols",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  }
+                }
+              },
+              "usb": {
+                "$id": "#/items/properties/_source/properties/layers/properties/usb",
+                "type": "object",
+                "required": [
+                  "usb.src",
+                  "usb.addr",
+                  "usb.dst",
+                  "usb.urb_id",
+                  "usb.urb_type",
+                  "usb.transfer_type",
+                  "usb.endpoint_address",
+                  "usb.endpoint_address_tree",
+                  "usb.device_address",
+                  "usb.bus_id",
+                  "usb.setup_flag",
+                  "usb.data_flag",
+                  "usb.urb_ts_sec",
+                  "usb.urb_ts_usec",
+                  "usb.urb_status",
+                  "usb.urb_len",
+                  "usb.data_len",
+                  "usb.response_in",
+                  "usb.interval",
+                  "usb.start_frame",
+                  "usb.copy_of_transfer_flags",
+                  "usb.iso.numdesc"
+                ],
+                "properties": {
+                  "usb.src": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.src",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.addr": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.addr",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.dst": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.dst",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.urb_id": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.urb_id",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.urb_type": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.urb_type",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.transfer_type": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.transfer_type",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.endpoint_address": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.endpoint_address",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.endpoint_address_tree": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.endpoint_address_tree",
+                    "type": "object",
+                    "required": [
+                      "usb.endpoint_address.direction",
+                      "usb.endpoint_address.number"
+                    ],
+                    "properties": {
+                      "usb.endpoint_address.direction": {
+                        "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.endpoint_address_tree/properties/usb.endpoint_address.direction",
+                        "type": "string",
+                        "pattern": "^(.*)$"
+                      },
+                      "usb.endpoint_address.number": {
+                        "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.endpoint_address_tree/properties/usb.endpoint_address.number",
+                        "type": "string",
+                        "pattern": "^(.*)$"
+                      }
+                    }
+                  },
+                  "usb.device_address": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.device_address",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.bus_id": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.bus_id",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.setup_flag": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.setup_flag",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.data_flag": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.data_flag",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.urb_ts_sec": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.urb_ts_sec",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.urb_ts_usec": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.urb_ts_usec",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.urb_status": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.urb_status",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.urb_len": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.urb_len",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.data_len": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.data_len",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.response_in": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.response_in",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.interval": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.interval",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.start_frame": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.start_frame",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.copy_of_transfer_flags": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.copy_of_transfer_flags",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.iso.numdesc": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/usb/properties/usb.iso.numdesc",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  }
+                }
+              },
+              "URB setup": {
+                "$id": "#/items/properties/_source/properties/layers/properties/URB setup",
+                "type": "object",
+                "required": [
+                  "usb.bmRequestType",
+                  "usb.bmRequestType_tree",
+                  "usb.setup.bRequest",
+                  "usb.setup.wValue",
+                  "usb.setup.wIndex",
+                  "usb.setup.wLength"
+                ],
+                "properties": {
+                  "usb.bmRequestType": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.bmRequestType",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.bmRequestType_tree": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.bmRequestType_tree",
+                    "type": "object",
+                    "required": [
+                      "usb.bmRequestType.direction",
+                      "usb.bmRequestType.type",
+                      "usb.bmRequestType.recipient"
+                    ],
+                    "properties": {
+                      "usb.bmRequestType.direction": {
+                        "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.bmRequestType_tree/properties/usb.bmRequestType.direction",
+                        "type": "string",
+                        "pattern": "^(.*)$"
+                      },
+                      "usb.bmRequestType.type": {
+                        "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.bmRequestType_tree/properties/usb.bmRequestType.type",
+                        "type": "string",
+                        "pattern": "^(.*)$"
+                      },
+                      "usb.bmRequestType.recipient": {
+                        "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.bmRequestType_tree/properties/usb.bmRequestType.recipient",
+                        "type": "string",
+                        "pattern": "^(.*)$"
+                      }
+                    }
+                  },
+                  "usb.setup.bRequest": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.setup.bRequest",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.setup.wValue": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.setup.wValue",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.setup.wIndex": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.setup.wIndex",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  },
+                  "usb.setup.wLength": {
+                    "$id": "#/items/properties/_source/properties/layers/properties/URB setup/properties/usb.setup.wLength",
+                    "type": "string",
+                    "pattern": "^(.*)$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
