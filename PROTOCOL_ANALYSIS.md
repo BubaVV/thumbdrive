@@ -30,21 +30,26 @@ Bytes 4-5:  11:11      = Product ID (big-endian) = 0x1111 (ThumbDrive)
 Bytes 6-7:  10:01      = Device version or USB spec (0x0110 = USB 1.1?)
 Bytes 8-9:  02:00      = Unknown
 Byte 10:    0x20       = Unknown (possibly sectors per block multiplier)
-Bytes 11-14:00:00:08:00 = Size parameter 1 (note: mixed endianness)
-Bytes 15-18:00:20:00:00 = Size parameter 2 (little-endian) = 0x20 = 32
+Bytes 11-14:00:08:00:00 = Size parameter 1 (little-endian: 0x00000800 = 2,048)
+Bytes 15-18:20:00:00:00 = Size parameter 2 (little-endian: 0x00000020 = 32)
 Bytes 19-30:           = Reserved / Padding (all zeros)
 ```
 
-**Note:** Bytes 11-18 use the capacity calculation from driver disassembly:
-- DWORD at offset 0x0B (bytes 11-14): 0x00080000 (big-endian) = 524,288
+**Note:** Both DWORDs at offsets 0x0B and 0x0F are **little-endian**, matching
+the native x86 word order used by the XP driver (`mov`/`imul`, no `bswap`).
+Their product gives the **total sector count**, not a byte count.
+
+- DWORD at offset 0x0B (bytes 11-14): 0x00000800 (little-endian) = 2,048
 - DWORD at offset 0x0F (bytes 15-18): 0x00000020 (little-endian) = 32
-- **Total Capacity: 524,288 × 32 = 16,777,216 bytes = 32 MB** (not 4 MB)
+- **Total Sectors: 2,048 × 32 = 65,536 (0x10000)**
+- **Total Capacity: 65,536 × 512 = 33,554,432 bytes = 32 MB**
 
 **Disk Capacity Calculation:**
-- Size parameter 1: 0x00080000 = 524,288
-- Size parameter 2: 0x20 = 32
-- **Total Capacity: 524,288 × 32 = 16,777,216 bytes = 32 MB**
-- **Total 512-byte blocks: 32,768 (0x8000)**
+- Size parameter 1: 0x00000800 = 2,048
+- Size parameter 2: 0x00000020 = 32
+- **Total Sectors: 2,048 × 32 = 65,536**
+- **Total Capacity: 65,536 × 512 = 33,554,432 bytes = 32 MB**
+- **Total 512-byte blocks: 65,536 (0x10000)**
 
 ---
 
@@ -186,10 +191,10 @@ Bulk OUT: FAT16 boot sector data, filesystem metadata, etc.
 1. **Custom Protocol:** Not standard USB Mass Storage (SCSI/BOT)
 2. **Block-Based:** LBA addressing with 512-byte sectors
 3. **Little-Endian:** LBA/count values use little-endian byte order
-4. **Mixed Endianness:** Device info uses big-endian for VID/PID, mixed for capacity
+4. **Little-Endian Capacity:** Both DWORDs in device info (offsets 0x0B, 0x0F) are little-endian; their product is the total sector count (× 512 for bytes)
 5. **Fixed Command:** bRequest=17 for all read/write operations
 6. **8-byte Command Block:** `[LBA:4][Count:4]` format
-7. **Disk Size:** 32 MB (from device info calculation, not from LBA range observed)
+7. **Disk Size:** 32 MB (65,536 sectors × 512 bytes)
 8. **Efficient Transfers:** 16-32 KB chunks (32-64 blocks) typical
 
 ---

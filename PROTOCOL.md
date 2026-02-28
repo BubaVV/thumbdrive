@@ -39,20 +39,26 @@ Control transfer parameters:
 | 0x04 | 2 | `11:11` | Product ID (0x1111) |
 | 0x06 | 4 | `10:01:02:00` | Unknown/Reserved |
 | 0x0A | 1 | `20` | Unknown |
-| **0x0B** | **4** | **`00:08:00:00`** | **Size parameter 1 (big-endian: 0x00080000 = 524,288)** |
+| **0x0B** | **4** | **`00:08:00:00`** | **Size parameter 1 (little-endian: 0x00000800 = 2,048)** |
 | **0x0F** | **4** | **`20:00:00:00`** | **Size parameter 2 (little-endian: 0x00000020 = 32)** |
 | 0x13 | 18 | `00:00:00:...` | Padding/Reserved |
 
 **Capacity Calculation (from driver disassembly):**
-```
-Size = (DWORD at 0x0B) * (DWORD at 0x0F)
-     = 0x00080000 * 0x20
-     = 524,288 * 32
-     = 16,777,216 (0x1000000)
-     = 32 MB total capacity
-```
 
-> **Note:** The value 0x1000000 is interpreted as 32 MB by the driver. This may represent 16M words (2 bytes each) or use a different unit multiplier.
+Both DWORDs are **little-endian** (native x86 word order — the XP driver
+uses plain `mov`/`imul`, no `bswap`).  Their product is the **total
+sector count**; multiply by 512 for bytes.
+
+```
+Sectors = (DWORD at 0x0B) * (DWORD at 0x0F)
+        = 0x00000800 * 0x00000020
+        = 2,048 * 32
+        = 65,536 sectors (0x10000)
+
+Bytes   = 65,536 * 512
+        = 33,554,432 (0x2000000)
+        = 32 MB total capacity
+```
 
 ## Block/Sector Size
 

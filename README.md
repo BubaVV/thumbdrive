@@ -3,7 +3,18 @@ Some attempts to connect antique Trek Thumdrive USB flash to Linux box
 
 USB ID: 0a16:1111 Trek Technology (S) PTE, Ltd ThumbDrive
 
-`win_driver` holds driver for XP and 2000. 
+`win_driver` holds driver for XP and 2000.
+
+### USB Permissions (udev)
+
+The device needs a udev rule for non-root access. Install the bundled rule:
+
+```bash
+sudo cp udev/50-trek.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+Then re-plug the device. See `udev/50-trek.rules` for details.
 
 Some dumps are collected: for subj and for usual mass storage pendrive
 
