@@ -57,6 +57,7 @@ EP_BULK_IN = 0x82    # Device → Host  (read data)
 
 SECTOR_SIZE = 512
 DEFAULT_USB_TIMEOUT = 5000  # ms
+MAX_CHUNK_SECTORS = 32      # 32 sectors = 16 KiB — matches XP driver behaviour
 
 INFO_RESPONSE_LEN = 31
 
@@ -298,27 +299,18 @@ class TrekDevice(BlockDevice):
     def info(self) -> DeviceInfo:
         return self._info
 
-    # ── I/O ─────────────────────────────────────────────────────────
+    # ── I/O (low-level: single USB transaction) ──────────────────────
 
     def _build_command(self, lba: int, count: int) -> bytes:
         """Build the 8-byte command payload: [LBA:u32le][Count:u32le]."""
         return struct.pack("<II", lba, count)
 
-    def read_blocks(self, lba: int, count: int) -> bytes:
-        """Read *count* 512-byte sectors starting at *lba*.
-
-        USB sequence (2 transactions):
-          1. control-out  0x42 bRequest=17  → 8-byte command
-          2. bulk-in  EP 0x82              ← count×512 bytes
-        """
-        if count <= 0:
-            return b""
+    def _read_chunk(self, lba: int, count: int) -> bytes:
+        """Issue one control-out + bulk-in for ≤ MAX_CHUNK_SECTORS sectors."""
         expected = count * SECTOR_SIZE
         cmd = self._build_command(lba, count)
-
         self._usb.control_out(BMRT_READ, BREQUEST_IO, cmd)
         data = self._usb.bulk_read(EP_BULK_IN, expected)
-
         if len(data) != expected:
             logger.warning(
                 "Short read: requested %d bytes, got %d (lba=%d, count=%d)",
@@ -326,28 +318,77 @@ class TrekDevice(BlockDevice):
             )
         return data
 
+    def _write_chunk(self, lba: int, count: int, data: bytes) -> None:
+        """Issue one control-out + bulk-out for ≤ MAX_CHUNK_SECTORS sectors."""
+        expected = count * SECTOR_SIZE
+        cmd = self._build_command(lba, count)
+        self._usb.control_out(BMRT_WRITE, BREQUEST_IO, cmd)
+        written = self._usb.bulk_write(EP_BULK_OUT, data)
+        if written != expected:
+            logger.warning(
+                "Short write: sent %d/%d bytes (lba=%d, count=%d)",
+                written, expected, lba, count,
+            )
+
+    # ── I/O (public: chunked + bounds-checked) ─────────────────────
+
+    def read_blocks(self, lba: int, count: int) -> bytes:
+        """Read *count* 512-byte sectors starting at *lba*.
+
+        Large requests are automatically split into ≤ MAX_CHUNK_SECTORS
+        (32 sector / 16 KiB) USB transactions, matching the transfer
+        pattern observed in XP driver captures.
+
+        Raises ValueError if the request exceeds device bounds.
+        """
+        if count <= 0:
+            return b""
+        if lba < 0 or lba + count > self._info.total_sectors:
+            raise ValueError(
+                f"read_blocks(lba={lba}, count={count}) out of range "
+                f"(device has {self._info.total_sectors} sectors)"
+            )
+
+        parts: list[bytes] = []
+        remaining = count
+        cur_lba = lba
+        while remaining > 0:
+            chunk = min(remaining, MAX_CHUNK_SECTORS)
+            parts.append(self._read_chunk(cur_lba, chunk))
+            cur_lba += chunk
+            remaining -= chunk
+        return b"".join(parts)
+
     def write_blocks(self, lba: int, count: int, data: bytes) -> None:
         """Write *count* 512-byte sectors starting at *lba*.
 
-        USB sequence (2 transactions):
-          1. control-out  0xC2 bRequest=17  → 8-byte command
-          2. bulk-out  EP 0x02             → count×512 bytes
+        Large requests are automatically split into ≤ MAX_CHUNK_SECTORS
+        (32 sector / 16 KiB) USB transactions.
+
+        Raises ValueError if data length doesn't match or request is
+        out of range.
         """
         expected = count * SECTOR_SIZE
         if len(data) != expected:
             raise ValueError(
                 f"Data length mismatch: expected {expected} bytes, got {len(data)}"
             )
-        cmd = self._build_command(lba, count)
-
-        self._usb.control_out(BMRT_WRITE, BREQUEST_IO, cmd)
-        written = self._usb.bulk_write(EP_BULK_OUT, data)
-
-        if written != expected:
-            logger.warning(
-                "Short write: sent %d/%d bytes (lba=%d, count=%d)",
-                written, expected, lba, count,
+        if lba < 0 or lba + count > self._info.total_sectors:
+            raise ValueError(
+                f"write_blocks(lba={lba}, count={count}) out of range "
+                f"(device has {self._info.total_sectors} sectors)"
             )
+
+        offset = 0
+        remaining = count
+        cur_lba = lba
+        while remaining > 0:
+            chunk = min(remaining, MAX_CHUNK_SECTORS)
+            chunk_bytes = chunk * SECTOR_SIZE
+            self._write_chunk(cur_lba, chunk, data[offset : offset + chunk_bytes])
+            cur_lba += chunk
+            offset += chunk_bytes
+            remaining -= chunk
 
     # ── byte-addressed convenience I/O ──────────────────────────────
 
@@ -408,6 +449,36 @@ class TrekDevice(BlockDevice):
         self._usb.close()
         logger.info("Device closed")
 
+    # ── utilities ───────────────────────────────────────────────────
+
+    def dump_image(self, path: str, progress: bool = True) -> None:
+        """Read the entire device and write a raw disk image to *path*.
+
+        Reads in MAX_CHUNK_SECTORS-sector chunks.  If *progress* is True,
+        prints a progress line to stderr every 64 chunks (~1 MiB).
+        """
+        import sys
+        total = self._info.total_sectors
+        written = 0
+        with open(path, "wb") as f:
+            while written < total:
+                chunk = min(MAX_CHUNK_SECTORS, total - written)
+                data = self.read_blocks(written, chunk)
+                f.write(data)
+                written += chunk
+                if progress and written % (MAX_CHUNK_SECTORS * 64) == 0:
+                    pct = written * 100 // total
+                    print(
+                        f"\r  {written}/{total} sectors ({pct}%)",
+                        end="", file=sys.stderr, flush=True,
+                    )
+        if progress:
+            print(
+                f"\r  {total}/{total} sectors (100%)  ",
+                file=sys.stderr, flush=True,
+            )
+        logger.info("Dump complete: %s (%d bytes)", path, total * SECTOR_SIZE)
+
     def __enter__(self) -> TrekDevice:
         return self
 
@@ -461,12 +532,42 @@ class FileBlockDevice(BlockDevice):
 # ── CLI smoke-test ──────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+    import argparse
+
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+    parser = argparse.ArgumentParser(description="Trek ThumbDrive utility")
+    sub = parser.add_subparsers(dest="cmd")
+
+    sub.add_parser("info", help="Print device info")
+
+    p_read = sub.add_parser("read", help="Read sectors")
+    p_read.add_argument("lba", type=int, help="Starting LBA")
+    p_read.add_argument("count", type=int, help="Number of sectors")
+    p_read.add_argument("-o", "--output", help="Write raw data to file")
+
+    p_dump = sub.add_parser("dump", help="Dump entire device to image file")
+    p_dump.add_argument("output", help="Output file path")
+
+    args = parser.parse_args()
 
     with TrekDevice.open() as dev:
-        print(dev.info)
-        print(f"Capacity: {dev.capacity} bytes")
+        if args.cmd == "info" or args.cmd is None:
+            print(dev.info)
+            print(f"Capacity: {dev.capacity} bytes")
+            mbr = dev.read_blocks(0, 1)
+            print(f"MBR first 16 bytes: {mbr[:16].hex(':')}")
 
-        # Read the MBR (first sector)
-        mbr = dev.read_blocks(0, 1)
-        print(f"MBR ({len(mbr)} bytes): {mbr[:16].hex(':')}")
+        elif args.cmd == "read":
+            data = dev.read_blocks(args.lba, args.count)
+            if args.output:
+                with open(args.output, "wb") as f:
+                    f.write(data)
+                print(f"Wrote {len(data)} bytes to {args.output}")
+            else:
+                for i in range(args.count):
+                    sec = data[i * 512 : (i + 1) * 512]
+                    print(f"sector {args.lba + i}: {sec[:32].hex(':')}")
+
+        elif args.cmd == "dump":
+            dev.dump_image(args.output)
